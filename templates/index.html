@@ -15,8 +15,16 @@
         <div class="controls">
             <button id="startButton" class="button">Start Recording</button>
             <button id="stopButton" class="button" disabled>Stop Recording</button>
+            <button id="analyzeButton" class="button" disabled>Analyze Text</button>
         </div>
         <div class="status" id="status">Click "Start Recording" to begin</div>
+        
+        <div class="analysis-section">
+            <h2>AI Analysis</h2>
+            <div id="analysis" class="analysis-box">
+                <p>Your text analysis will appear here after clicking "Analyze Text"</p>
+            </div>
+        </div>
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
