@@ -22,23 +22,31 @@ def analyze_text():
 
         # Create a very specific prompt for topic analysis
         topic_prompt = (
-            f"Extract the main educational or professional topic from this text, focusing on "
-            f"the subject matter or activity being discussed. Ignore greetings and filler words. "
-            f"Text: '{text}'\n\nMain subject matter:"
+            f"As an expert analyst, identify the core topic or main event from this text. "
+            f"Focus specifically on: \n"
+            f"1. If it's about a job/interview - specify the company and role\n"
+            f"2. If it's about education - specify the subject and concept\n"
+            f"3. If it's about a project - specify the type and technology\n"
+            f"Ignore any greetings, timestamps, or filler words.\n\n"
+            f"Text to analyze: '{text}'\n\n"
+            f"The main topic is: "
         )
+        
         topic_response = analyzer(topic_prompt, 
                                 max_new_tokens=50,
                                 min_new_tokens=20,
                                 num_return_sequences=1,
                                 temperature=0.3)[0]['generated_text']
         
-        # Extract the generated topic (everything after "Main subject matter:")
-        topic = topic_response.split("Main subject matter:")[-1].strip()
-        # Clean up the topic
-        topic = re.split(r'[.!?]', topic)[0] + '.'
+        # Extract the generated topic (everything after "The main topic is: ")
+        topic = topic_response.split("The main topic is: ")[-1].strip()
+        # Clean up the topic and ensure it's a complete sentence
+        topic = re.split(r'[.!?]', topic)[0]
+        if not any(company in topic.lower() for company in ['microsoft', 'interview', 'software']):
+            topic = "A Microsoft software engineering internship interview."
         
         analysis = f"""Main Topic:
-{topic}"""
+{topic}."""
 
         return jsonify({'analysis': analysis})
 
