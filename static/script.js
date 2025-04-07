@@ -1,10 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Tab switching
+    const speechTab = document.getElementById('speechTab');
+    const pasteTab = document.getElementById('pasteTab');
+    const speechInput = document.getElementById('speechInput');
+    const pasteInput = document.getElementById('pasteInput');
+
+    speechTab.addEventListener('click', () => {
+        speechTab.classList.add('active');
+        pasteTab.classList.remove('active');
+        speechInput.classList.add('active');
+        pasteInput.classList.remove('active');
+    });
+
+    pasteTab.addEventListener('click', () => {
+        pasteTab.classList.add('active');
+        speechTab.classList.remove('active');
+        pasteInput.classList.add('active');
+        speechInput.classList.remove('active');
+    });
+
+    // Speech recognition setup
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
-    const analyzeButton = document.getElementById('analyzeButton');
     const transcript = document.getElementById('transcript');
-    const analysis = document.getElementById('analysis');
     const status = document.getElementById('status');
+    const analysis = document.getElementById('analysis');
 
     let recognition = null;
     let isRecording = false;
@@ -18,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         status.textContent = 'Speech recognition is not supported in this browser.';
         startButton.disabled = true;
-        return;
     }
 
     // Configure recognition
@@ -31,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
         isRecording = true;
         startButton.disabled = true;
         stopButton.disabled = false;
-        analyzeButton.disabled = true;
         status.textContent = 'Recording in progress...';
     };
 
@@ -39,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
         isRecording = false;
         startButton.disabled = false;
         stopButton.disabled = true;
-        analyzeButton.disabled = false;
         status.textContent = 'Recording stopped.';
     };
 
@@ -63,30 +80,38 @@ document.addEventListener('DOMContentLoaded', () => {
         isRecording = false;
         startButton.disabled = false;
         stopButton.disabled = true;
-        analyzeButton.disabled = true;
     };
 
     // Button event listeners
     startButton.addEventListener('click', () => {
         transcript.textContent = '';
-        analysis.innerHTML = '<p>Your text analysis will appear here after clicking "Analyze Text"</p>';
+        analysis.innerHTML = '<p>Your interview analysis will appear here after clicking "Analyze"</p>';
         finalTranscript = '';
         recognition.start();
     });
 
     stopButton.addEventListener('click', () => {
         recognition.stop();
+        analyzeTranscript(finalTranscript);
     });
 
-    analyzeButton.addEventListener('click', async () => {
-        if (!finalTranscript.trim()) {
-            status.textContent = 'No text to analyze. Please record some speech first.';
+    // Pasted text analysis
+    const analyzePastedButton = document.getElementById('analyzePastedButton');
+    const transcriptInput = document.getElementById('transcriptInput');
+
+    analyzePastedButton.addEventListener('click', () => {
+        const pastedText = transcriptInput.value.trim();
+        if (!pastedText) {
+            status.textContent = 'Please paste a transcript first.';
             return;
         }
+        analyzeTranscript(pastedText);
+    });
 
-        analyzeButton.disabled = true;
-        status.textContent = 'Analyzing text...';
-        analysis.innerHTML = '<p>Analyzing text...</p>';
+    // Common analysis function
+    async function analyzeTranscript(text) {
+        status.textContent = 'Analyzing transcript...';
+        analysis.innerHTML = '<p>Analyzing transcript...</p>';
 
         try {
             const response = await fetch('/analyze', {
@@ -94,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ text: finalTranscript }),
+                body: JSON.stringify({ text: text }),
             });
 
             const data = await response.json();
@@ -103,13 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 analysis.innerHTML = `<p>${data.analysis}</p>`;
                 status.textContent = 'Analysis complete!';
             } else {
-                throw new Error(data.error || 'Failed to analyze text');
+                throw new Error(data.error || 'Failed to analyze transcript');
             }
         } catch (error) {
             status.textContent = `Error: ${error.message}`;
-            analysis.innerHTML = '<p>Error analyzing text. Please try again.</p>';
-        } finally {
-            analyzeButton.disabled = false;
+            analysis.innerHTML = '<p>Error analyzing transcript. Please try again.</p>';
         }
-    });
+    }
 }); 

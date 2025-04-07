@@ -3,26 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Speech Transcription</title>
+    <title>Interview Analysis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Live Speech Transcription</h1>
-        <div class="transcription-box">
-            <div id="transcript" class="transcript"></div>
-        </div>
-        <div class="controls">
-            <button id="startButton" class="button">Start Recording</button>
-            <button id="stopButton" class="button" disabled>Stop Recording</button>
-            <button id="analyzeButton" class="button" disabled>Analyze Text</button>
-        </div>
-        <div class="status" id="status">Click "Start Recording" to begin</div>
+        <h1>Interview Analysis</h1>
         
+        <div class="input-section">
+            <h2>Choose Input Method</h2>
+            <div class="input-tabs">
+                <button class="tab-button active" id="speechTab">Speech Input</button>
+                <button class="tab-button" id="pasteTab">Paste Transcript</button>
+            </div>
+
+            <div id="speechInput" class="input-content active">
+                <div class="transcription-box">
+                    <div id="transcript" class="transcript"></div>
+                </div>
+                <div class="controls">
+                    <button id="startButton" class="button">Start Recording</button>
+                    <button id="stopButton" class="button" disabled>Stop Recording</button>
+                </div>
+                <div class="status" id="status">Click "Start Recording" to begin</div>
+            </div>
+
+            <div id="pasteInput" class="input-content">
+                <textarea id="transcriptInput" class="transcript-input" 
+                    placeholder="Paste your interview transcript here..."></textarea>
+                <button id="analyzePastedButton" class="button">Analyze Transcript</button>
+            </div>
+        </div>
+
         <div class="analysis-section">
             <h2>AI Analysis</h2>
             <div id="analysis" class="analysis-box">
-                <p>Your text analysis will appear here after clicking "Analyze Text"</p>
+                <p>Your interview analysis will appear here after clicking "Analyze"</p>
             </div>
         </div>
     </div>

@@ -1,11 +1,21 @@
 from flask import Flask, render_template, request, jsonify
-from transformers import pipeline
-import re
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 
-# Initialize the text generation pipeline with DistilGPT-2
-analyzer = pipeline('text-generation', model='distilgpt2')
+# Configure OpenAI
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+if not os.getenv('OPENAI_API_KEY'):
+    raise ValueError("OPENAI_API_KEY not found in environment variables. Please add it to your .env file.")
+
+# Model configuration
+# MODEL = "gpt-4"  # Using GPT-4 for better analysis
+MODEL = "gpt-3.5-turbo"  # Alternative if GPT-4 is not available
 
 @app.route('/')
 def index():
@@ -20,38 +30,43 @@ def analyze_text():
         if not text:
             return jsonify({'error': 'No text provided'}), 400
 
-        # Create a very specific prompt for topic analysis
-        topic_prompt = (
-            f"As an expert analyst, identify the core topic or main event from this text. "
-            f"Focus specifically on: \n"
-            f"1. If it's about a job/interview - specify the company and role\n"
-            f"2. If it's about education - specify the subject and concept\n"
-            f"3. If it's about a project - specify the type and technology\n"
-            f"Ignore any greetings, timestamps, or filler words.\n\n"
-            f"Text to analyze: '{text}'\n\n"
-            f"The main topic is: "
+        # Create a detailed prompt for interview analysis
+        prompt = (
+            f"Analyze this interview transcript and provide:\n"
+            f"1. A rating out of 100 based on:\n"
+            f"   - Technical knowledge (30 points)\n"
+            f"   - Communication skills (20 points)\n"
+            f"   - Problem-solving approach (20 points)\n"
+            f"   - Professionalism (15 points)\n"
+            f"   - Overall impression (15 points)\n"
+            f"2. A detailed review highlighting:\n"
+            f"   - Strengths\n"
+            f"   - Areas for improvement\n"
+            f"   - Key takeaways\n"
+            f"3. Specific feedback on:\n"
+            f"   - Technical responses\n"
+            f"   - Communication style\n"
+            f"   - Interview presence\n\n"
+            f"Transcript to analyze:\n{text}"
         )
-        
-        topic_response = analyzer(topic_prompt, 
-                                max_new_tokens=50,
-                                min_new_tokens=20,
-                                num_return_sequences=1,
-                                temperature=0.3)[0]['generated_text']
-        
-        # Extract the generated topic (everything after "The main topic is: ")
-        topic = topic_response.split("The main topic is: ")[-1].strip()
-        # Clean up the topic and ensure it's a complete sentence
-        topic = re.split(r'[.!?]', topic)[0]
-        if not any(company in topic.lower() for company in ['microsoft', 'interview', 'software']):
-            topic = "A Microsoft software engineering internship interview."
-        
-        analysis = f"""Main Topic:
-{topic}."""
 
+        # Generate analysis using OpenAI
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": "You are an expert interview analyst with experience in software engineering interviews."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1000
+        )
+
+        analysis = response.choices[0].message.content
+        
         return jsonify({'analysis': analysis})
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True) 
