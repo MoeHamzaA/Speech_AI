@@ -20,13 +20,53 @@ body {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
+h1, h2 {
     text-align: center;
     margin-bottom: 2rem;
     color: #2c3e50;
 }
 
-.transcription-box {
+h2 {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+}
+
+.input-section {
+    margin-bottom: 2rem;
+}
+
+.input-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.tab-button {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #e9ecef;
+    color: #495057;
+    transition: all 0.3s;
+}
+
+.tab-button.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.input-content {
+    display: none;
+}
+
+.input-content.active {
+    display: block;
+}
+
+.transcription-box, .analysis-box {
     background-color: #f8f9fa;
     border: 1px solid #dee2e6;
     border-radius: 5px;
@@ -35,9 +75,26 @@ h1 {
     margin-bottom: 1.5rem;
 }
 
-.transcript {
+.transcript, .analysis-box {
     white-space: pre-wrap;
     font-size: 1.1rem;
+}
+
+.transcript-input {
+    width: 100%;
+    min-height: 200px;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.analysis-box {
+    background-color: #e8f4f8;
+    border-color: #b8d8e8;
 }
 
 .controls {
@@ -74,6 +131,16 @@ h1 {
     background-color: #c82333;
 }
 
+#analyzePastedButton {
+    background-color: #007bff;
+    color: white;
+    width: 100%;
+}
+
+#analyzePastedButton:hover {
+    background-color: #0056b3;
+}
+
 .button:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
@@ -83,4 +150,10 @@ h1 {
     text-align: center;
     color: #6c757d;
     font-style: italic;
+}
+
+.analysis-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #dee2e6;
 } 
